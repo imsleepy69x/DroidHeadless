@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap
  * The CDP (Chrome DevTools Protocol) server.
  *
  * This class runs TWO servers:
- * 1. HTTP server (NanoHTTPD) on the configured port for /json/* endpoints
+ * 1. HTTP server (NanoHTTPD) on the configured port for /json/[*] endpoints
  * 2. WebSocket server on port+1 for ws://localhost:{port+1}/devtools/page/{id}
  *
  * The HTTP server handles:
