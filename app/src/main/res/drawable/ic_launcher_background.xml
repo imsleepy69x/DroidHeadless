@@ -5,29 +5,9 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Deep dark background -->
+    <!-- Clean white background -->
     <path
-        android:fillColor="#FF0D1117"
+        android:fillColor="#FFFFFFFF"
         android:pathData="M0,0 L108,0 L108,108 L0,108 Z" />
-
-    <!-- Subtle grid lines horizontal -->
-    <path android:fillColor="#0800E5FF" android:pathData="M0,18 L108,18 L108,18.5 L0,18.5 Z" />
-    <path android:fillColor="#0800E5FF" android:pathData="M0,36 L108,36 L108,36.5 L0,36.5 Z" />
-    <path android:fillColor="#0800E5FF" android:pathData="M0,54 L108,54 L108,54.5 L0,54.5 Z" />
-    <path android:fillColor="#0800E5FF" android:pathData="M0,72 L108,72 L108,72.5 L0,72.5 Z" />
-    <path android:fillColor="#0800E5FF" android:pathData="M0,90 L108,90 L108,90.5 L0,90.5 Z" />
-
-    <!-- Subtle grid lines vertical -->
-    <path android:fillColor="#0800E5FF" android:pathData="M18,0 L18.5,0 L18.5,108 L18,108 Z" />
-    <path android:fillColor="#0800E5FF" android:pathData="M36,0 L36.5,0 L36.5,108 L36,108 Z" />
-    <path android:fillColor="#0800E5FF" android:pathData="M54,0 L54.5,0 L54.5,108 L54,108 Z" />
-    <path android:fillColor="#0800E5FF" android:pathData="M72,0 L72.5,0 L72.5,108 L72,108 Z" />
-    <path android:fillColor="#0800E5FF" android:pathData="M90,0 L90.5,0 L90.5,108 L90,108 Z" />
-
-    <!-- Radial glow centre -->
-    <radialGradient />
-    <path
-        android:fillColor="#1A00E5FF"
-        android:pathData="M54,54m-38,0a38,38 0,1 1,76 0a38,38 0,1 1,-76 0" />
 
 </vector>
