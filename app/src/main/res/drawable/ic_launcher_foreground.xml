@@ -1,57 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Adaptive icon foreground — Chrome-inspired minimal design.
+    Canvas: 108×108dp. Safe zone: 18dp inset on each side (72×72dp center).
+    All art is within the 72×72 safe zone centered at (54,54).
+    Outer ring r=30, inner white ring r=18, center dot r=10.
+-->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Outer ring - blue segment (top-right, like Chrome blue) -->
-    <path
-        android:fillColor="#FF4285F4"
-        android:pathData="M54,14 A40,40 0,0,1 88.64,34 L74.32,42 A24,24 0,0,0 54,30 Z" />
+    <!-- Outer ring segments (r=30, centered at 54,54) -->
+    <!-- Blue: top-right -->
+    <path android:fillColor="#FF4285F4"
+        android:pathData="M54,24 A30,30 0,0,1 79.98,39 L67.49,46.5 A18,18 0,0,0 54,36 Z"/>
+    <!-- Red: right -->
+    <path android:fillColor="#FFEA4335"
+        android:pathData="M79.98,39 A30,30 0,0,1 79.98,69 L67.49,61.5 A18,18 0,0,0 67.49,46.5 Z"/>
+    <!-- Yellow: bottom-right -->
+    <path android:fillColor="#FFFBBC04"
+        android:pathData="M79.98,69 A30,30 0,0,1 54,84 L54,72 A18,18 0,0,0 67.49,61.5 Z"/>
+    <!-- Green: bottom-left -->
+    <path android:fillColor="#FF34A853"
+        android:pathData="M54,84 A30,30 0,0,1 28.02,69 L40.51,61.5 A18,18 0,0,0 54,72 Z"/>
+    <!-- Blue: left -->
+    <path android:fillColor="#FF4285F4"
+        android:pathData="M28.02,69 A30,30 0,0,1 28.02,39 L40.51,46.5 A18,18 0,0,0 40.51,61.5 Z"/>
+    <!-- Red: top-left -->
+    <path android:fillColor="#FFEA4335"
+        android:pathData="M28.02,39 A30,30 0,0,1 54,24 L54,36 A18,18 0,0,0 40.51,46.5 Z"/>
 
-    <!-- Outer ring - red segment (bottom-right) -->
-    <path
-        android:fillColor="#FFEA4335"
-        android:pathData="M88.64,34 A40,40 0,0,1 88.64,74 L74.32,66 A24,24 0,0,0 74.32,42 Z" />
+    <!-- White inner circle (r=18) — punches the ring hole -->
+    <path android:fillColor="#FFFFFFFF"
+        android:pathData="M54,54m-18,0a18,18 0,1 1,36 0a18,18 0,1 1,-36 0"/>
 
-    <!-- Outer ring - yellow segment (bottom) -->
-    <path
-        android:fillColor="#FFFBBC04"
-        android:pathData="M88.64,74 A40,40 0,0,1 54,94 L54,78 A24,24 0,0,0 74.32,66 Z" />
+    <!-- Center dot — blue (r=10) -->
+    <path android:fillColor="#FF4285F4"
+        android:pathData="M54,54m-10,0a10,10 0,1 1,20 0a10,10 0,1 1,-20 0"/>
 
-    <!-- Outer ring - green segment (bottom-left) -->
-    <path
-        android:fillColor="#FF34A853"
-        android:pathData="M54,94 A40,40 0,0,1 19.36,74 L33.68,66 A24,24 0,0,0 54,78 Z" />
-
-    <!-- Outer ring - blue segment (left) -->
-    <path
-        android:fillColor="#FF4285F4"
-        android:pathData="M19.36,74 A40,40 0,0,1 19.36,34 L33.68,42 A24,24 0,0,0 33.68,66 Z" />
-
-    <!-- Outer ring - red segment (top-left) -->
-    <path
-        android:fillColor="#FFEA4335"
-        android:pathData="M19.36,34 A40,40 0,0,1 54,14 L54,30 A24,24 0,0,0 33.68,42 Z" />
-
-    <!-- White inner circle -->
-    <path
-        android:fillColor="#FFFFFFFF"
-        android:pathData="M54,54m-24,0a24,24 0,1 1,48 0a24,24 0,1 1,-48 0" />
-
-    <!-- Center circle - blue (Android/headless tint) -->
-    <path
-        android:fillColor="#FF4285F4"
-        android:pathData="M54,54m-12,0a12,12 0,1 1,24 0a12,12 0,1 1,-24 0" />
-
-    <!-- Small terminal cursor > hint in center, white -->
+    <!-- White chevron > in center -->
     <path
         android:fillColor="#00000000"
         android:strokeColor="#FFFFFFFF"
-        android:strokeWidth="2.5"
+        android:strokeWidth="2"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:pathData="M50,49 L58,54 L50,59" />
+        android:pathData="M51,49.5 L58,54 L51,58.5"/>
 
 </vector>
