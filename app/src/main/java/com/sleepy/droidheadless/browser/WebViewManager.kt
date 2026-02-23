@@ -256,8 +256,11 @@ class WebViewManager(
 
         mainHandler.post {
             try {
-                // Install a one-shot WebViewClient that completes the deferred
-                // when the page finishes loading, then restores normal behavior.
+                // Track how many onPageStarted calls we have seen so we only
+                // complete the deferred after the *last* onPageFinished (i.e. the
+                // final destination after any redirects).
+                var pendingLoads = 0
+
                 val originalClient = page.webView.webViewClient
                 page.webView.webViewClient = object : WebViewClient() {
 
@@ -271,6 +274,7 @@ class WebViewManager(
 
                     override fun onPageStarted(view: WebView?, u: String?, favicon: Bitmap?) {
                         super.onPageStarted(view, u, favicon)
+                        pendingLoads++
                         emitPageEvent(pageId, "Page.frameStartedLoading", JSONObject().apply {
                             put("frameId", pageId)
                         })
@@ -278,7 +282,9 @@ class WebViewManager(
 
                     override fun onPageFinished(view: WebView?, finishedUrl: String?) {
                         super.onPageFinished(view, finishedUrl)
-                        // Update stored URL now that the page is actually loaded
+                        pendingLoads--
+
+                        // Update stored URL on every finish (handles redirects)
                         pages[pageId]?.currentUrl = finishedUrl ?: url
 
                         emitPageEvent(pageId, "Page.loadEventFired", JSONObject().apply {
@@ -301,9 +307,17 @@ class WebViewManager(
                             put("timestamp", System.currentTimeMillis() / 1000.0)
                         })
 
-                        // Restore original client and signal completion
-                        page.webView.webViewClient = originalClient
-                        if (!deferred.isCompleted) deferred.complete(true)
+                        // Only complete when there are no more pending loads
+                        // (i.e., all redirects have settled). Give a short grace
+                        // period to catch any same-document navigations or JS redirects.
+                        if (pendingLoads <= 0) {
+                            mainHandler.postDelayed({
+                                if (pendingLoads <= 0) {
+                                    page.webView.webViewClient = originalClient
+                                    if (!deferred.isCompleted) deferred.complete(true)
+                                }
+                            }, 300)
+                        }
                     }
 
                     override fun onReceivedError(
@@ -314,9 +328,11 @@ class WebViewManager(
                         super.onReceivedError(view, request, error)
                         if (request?.isForMainFrame == true) {
                             Log.w(TAG, "Page error: ${error?.description} for ${request.url}")
-                            pages[pageId]?.currentUrl = url
-                            page.webView.webViewClient = originalClient
-                            if (!deferred.isCompleted) deferred.complete(false)
+                            pages[pageId]?.currentUrl = page.webView.url ?: url
+                            mainHandler.postDelayed({
+                                page.webView.webViewClient = originalClient
+                                if (!deferred.isCompleted) deferred.complete(false)
+                            }, 300)
                         }
                     }
                 }
