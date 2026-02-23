@@ -4,10 +4,10 @@
     <string name="channel_name">Headless Browser</string>
     <string name="channel_description">Shows status of the headless browser service</string>
     <string name="notification_title">Headless browser running</string>
-    <string name="notification_text_template">Port %d · %d requests · %s</string>
+    <string name="notification_text_template" formatted="false">Port %d · %d requests · %s</string>
     <string name="start_service">Start Headless Browser</string>
     <string name="stop_service">Stop Headless Browser</string>
-    <string name="status_running">● Running on port %d</string>
+    <string name="status_running" formatted="false">● Running on port %d</string>
     <string name="status_stopped">○ Stopped</string>
     <string name="settings">Settings</string>
     <string name="pref_port_key">cdp_port</string>
