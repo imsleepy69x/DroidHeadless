@@ -33,5 +33,5 @@ cd DroidHeadless
 # Build debug APK
 ./gradlew assembleDebug
 
-# Install on connected device
+# Install on connected device if you have any :)
 ./gradlew installDebug
