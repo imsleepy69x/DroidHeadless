@@ -1,0 +1,83 @@
+<!-- File: app/src/main/res/layout/activity_settings.xml -->
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorSurface"
+        app:title="Settings"
+        app:navigationIcon="?attr/homeAsUpIndicator"
+        xmlns:app="http://schemas.android.com/apk/res-auto" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Port setting -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/pref_port_title"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="Port number (default: 9222)">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etPort"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:maxLength="5" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/pref_port_summary"
+            android:textSize="12sp"
+            android:textColor="?android:textColorSecondary"
+            android:layout_marginTop="4dp" />
+
+        <!-- Auto-start toggle -->
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switchAutoStart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/pref_autostart_title"
+            android:layout_marginTop="32dp"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/pref_autostart_summary"
+            android:textSize="12sp"
+            android:textColor="?android:textColorSecondary"
+            android:layout_marginTop="4dp"
+            android:layout_marginStart="4dp" />
+
+        <!-- Save button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSave"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Save"
+            android:layout_marginTop="32dp" />
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,196 @@
+
+```yaml
+# File: .github/workflows/build.yml
+name: Build DroidHeadless
+
+on:
+  push:
+    branches: [main, develop]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  JAVA_VERSION: '17'
+  GRADLE_VERSION: '8.5'
+
+jobs:
+  # ═══════════════════════════════════════════
+  # Debug build — must pass before release
+  # ═══════════════════════════════════════════
+  build-debug:
+    name: 🔨 Debug APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: temurin
+
+      # Install Gradle + generate wrapper if missing
+      - name: Cache Gradle distribution
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle/wrapper/dists
+          key: gradle-dist-${{ env.GRADLE_VERSION }}
+
+      - name: Generate Gradle wrapper
+        run: |
+          if [ ! -f "gradlew" ] || [ ! -f "gradle/wrapper/gradle-wrapper.jar" ]; then
+            echo "Generating Gradle wrapper..."
+            wget -q "https://services.gradle.org/distributions/gradle-${{ env.GRADLE_VERSION }}-bin.zip" -O /tmp/gradle.zip
+            unzip -qo /tmp/gradle.zip -d /tmp
+            /tmp/gradle-${{ env.GRADLE_VERSION }}/bin/gradle wrapper --gradle-version ${{ env.GRADLE_VERSION }}
+          fi
+          chmod +x gradlew
+
+      # Cache wrapper files
+      - name: Cache Gradle wrapper
+        uses: actions/cache@v4
+        with:
+          path: |
+            gradle/wrapper/gradle-wrapper.jar
+            gradle/wrapper/gradle-wrapper.properties
+          key: wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+
+      # Cache dependencies
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/notifications
+          key: gradle-deps-${{ runner.os }}-${{ hashFiles('**/*.gradle.kts') }}
+          restore-keys: gradle-deps-${{ runner.os }}-
+
+      # Cache Android build
+      - name: Cache Android build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.android/build-cache
+            .gradle/build-cache
+          key: android-cache-${{ runner.os }}-${{ hashFiles('**/*.gradle.kts') }}
+          restore-keys: android-cache-${{ runner.os }}-
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@v3
+
+      - name: Build debug APK
+        run: ./gradlew assembleDebug --no-daemon --build-cache --stacktrace
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: DroidHeadless-debug
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+  # ═══════════════════════════════════════════
+  # Release build — only after debug passes
+  # ═══════════════════════════════════════════
+  build-release:
+    name: 🚀 Release APK (unsigned)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: build-debug
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: temurin
+
+      - name: Cache Gradle distribution
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle/wrapper/dists
+          key: gradle-dist-${{ env.GRADLE_VERSION }}
+
+      - name: Generate Gradle wrapper
+        run: |
+          if [ ! -f "gradlew" ] || [ ! -f "gradle/wrapper/gradle-wrapper.jar" ]; then
+            wget -q "https://services.gradle.org/distributions/gradle-${{ env.GRADLE_VERSION }}-bin.zip" -O /tmp/gradle.zip
+            unzip -qo /tmp/gradle.zip -d /tmp
+            /tmp/gradle-${{ env.GRADLE_VERSION }}/bin/gradle wrapper --gradle-version ${{ env.GRADLE_VERSION }}
+          fi
+          chmod +x gradlew
+
+      - name: Cache Gradle wrapper
+        uses: actions/cache@v4
+        with:
+          path: |
+            gradle/wrapper/gradle-wrapper.jar
+            gradle/wrapper/gradle-wrapper.properties
+          key: wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/notifications
+          key: gradle-deps-${{ runner.os }}-${{ hashFiles('**/*.gradle.kts') }}
+          restore-keys: gradle-deps-${{ runner.os }}-
+
+      - name: Cache Android build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.android/build-cache
+            .gradle/build-cache
+          key: android-cache-${{ runner.os }}-${{ hashFiles('**/*.gradle.kts') }}
+          restore-keys: android-cache-${{ runner.os }}-
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@v3
+
+      - name: Build release APK
+        run: ./gradlew assembleRelease --no-daemon --build-cache --stacktrace
+
+      - name: Prepare release artifact
+        run: |
+          mkdir -p release-output
+          RELEASE_APK=$(find app/build/outputs/apk/release -name "*.apk" | head -1)
+          cp "$RELEASE_APK" release-output/DroidHeadless-release-unsigned.apk
+
+      - name: Upload release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: DroidHeadless-release-unsigned
+          path: release-output/DroidHeadless-release-unsigned.apk
+          if-no-files-found: error
+          retention-days: 90
+          compression-level: 0
+
+      - name: Upload ProGuard mapping
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: proguard-mapping
+          path: app/build/outputs/mapping/release/mapping.txt
+          if-no-files-found: warn
+          retention-days: 90

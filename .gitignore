@@ -1,0 +1,15 @@
+# File: .gitignore
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+.idea/
+*.iml
+local.properties
+*.apk
+*.aab
+*.jks
+*.keystore
+.DS_Store
+Thumbs.db
+*.log
