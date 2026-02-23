@@ -242,6 +242,8 @@ class WebViewManager(
 
     /**
      * Navigates an existing page to a new URL.
+     * The deferred completes only after onPageFinished fires, so callers
+     * can be sure the page is actually loaded before evaluating JS.
      */
     fun navigate(pageId: String, url: String): CompletableDeferred<Boolean> {
         val deferred = CompletableDeferred<Boolean>()
@@ -254,9 +256,73 @@ class WebViewManager(
 
         mainHandler.post {
             try {
-                page.currentUrl = url
+                // Install a one-shot WebViewClient that completes the deferred
+                // when the page finishes loading, then restores normal behavior.
+                val originalClient = page.webView.webViewClient
+                page.webView.webViewClient = object : WebViewClient() {
+
+                    override fun shouldInterceptRequest(
+                        view: WebView?,
+                        request: WebResourceRequest?
+                    ): WebResourceResponse? {
+                        if (request == null) return null
+                        return networkInterceptor.interceptRequest(pageId, request)
+                    }
+
+                    override fun onPageStarted(view: WebView?, u: String?, favicon: Bitmap?) {
+                        super.onPageStarted(view, u, favicon)
+                        emitPageEvent(pageId, "Page.frameStartedLoading", JSONObject().apply {
+                            put("frameId", pageId)
+                        })
+                    }
+
+                    override fun onPageFinished(view: WebView?, finishedUrl: String?) {
+                        super.onPageFinished(view, finishedUrl)
+                        // Update stored URL now that the page is actually loaded
+                        pages[pageId]?.currentUrl = finishedUrl ?: url
+
+                        emitPageEvent(pageId, "Page.loadEventFired", JSONObject().apply {
+                            put("timestamp", System.currentTimeMillis() / 1000.0)
+                        })
+                        emitPageEvent(pageId, "Page.frameStoppedLoading", JSONObject().apply {
+                            put("frameId", pageId)
+                        })
+                        emitPageEvent(pageId, "Page.frameNavigated", JSONObject().apply {
+                            put("frame", JSONObject().apply {
+                                put("id", pageId)
+                                put("loaderId", pageId)
+                                put("url", finishedUrl ?: url)
+                                put("domainAndRegistry", "")
+                                put("securityOrigin", finishedUrl ?: url)
+                                put("mimeType", "text/html")
+                            })
+                        })
+                        emitPageEvent(pageId, "Page.domContentEventFired", JSONObject().apply {
+                            put("timestamp", System.currentTimeMillis() / 1000.0)
+                        })
+
+                        // Restore original client and signal completion
+                        page.webView.webViewClient = originalClient
+                        if (!deferred.isCompleted) deferred.complete(true)
+                    }
+
+                    override fun onReceivedError(
+                        view: WebView?,
+                        request: WebResourceRequest?,
+                        error: WebResourceError?
+                    ) {
+                        super.onReceivedError(view, request, error)
+                        if (request?.isForMainFrame == true) {
+                            Log.w(TAG, "Page error: ${error?.description} for ${request.url}")
+                            pages[pageId]?.currentUrl = url
+                            page.webView.webViewClient = originalClient
+                            if (!deferred.isCompleted) deferred.complete(false)
+                        }
+                    }
+                }
+
                 page.webView.loadUrl(url)
-                deferred.complete(true)
+
             } catch (e: Exception) {
                 Log.e(TAG, "Navigation failed", e)
                 deferred.completeExceptionally(e)
