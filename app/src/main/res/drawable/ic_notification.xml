@@ -1,4 +1,3 @@
-<!-- File: app/src/main/res/drawable/ic_notification.xml -->
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Simple browser icon for notification -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
