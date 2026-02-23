@@ -1,5 +1,3 @@
-
-```yaml
 # File: .github/workflows/build.yml
 name: Build DroidHeadless
 
