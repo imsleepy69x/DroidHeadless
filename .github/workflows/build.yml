@@ -1,4 +1,3 @@
-# File: .github/workflows/build.yml
 name: Build DroidHeadless
 
 on:
@@ -15,7 +14,6 @@ concurrency:
 
 env:
   JAVA_VERSION: '17'
-  GRADLE_VERSION: '8.5'
 
 jobs:
   # ═══════════════════════════════════════════
@@ -36,51 +34,10 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: temurin
 
-      # Install Gradle + generate wrapper if missing
-      - name: Cache Gradle distribution
-        uses: actions/cache@v4
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v3
         with:
-          path: ~/.gradle/wrapper/dists
-          key: gradle-dist-${{ env.GRADLE_VERSION }}
-
-      - name: Generate Gradle wrapper
-        run: |
-          if [ ! -f "gradlew" ] || [ ! -f "gradle/wrapper/gradle-wrapper.jar" ]; then
-            echo "Generating Gradle wrapper..."
-            wget -q "https://services.gradle.org/distributions/gradle-${{ env.GRADLE_VERSION }}-bin.zip" -O /tmp/gradle.zip
-            unzip -qo /tmp/gradle.zip -d /tmp
-            /tmp/gradle-${{ env.GRADLE_VERSION }}/bin/gradle wrapper --gradle-version ${{ env.GRADLE_VERSION }}
-          fi
-          chmod +x gradlew
-
-      # Cache wrapper files
-      - name: Cache Gradle wrapper
-        uses: actions/cache@v4
-        with:
-          path: |
-            gradle/wrapper/gradle-wrapper.jar
-            gradle/wrapper/gradle-wrapper.properties
-          key: wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
-
-      # Cache dependencies
-      - name: Cache Gradle dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/notifications
-          key: gradle-deps-${{ runner.os }}-${{ hashFiles('**/*.gradle.kts') }}
-          restore-keys: gradle-deps-${{ runner.os }}-
-
-      # Cache Android build
-      - name: Cache Android build
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.android/build-cache
-            .gradle/build-cache
-          key: android-cache-${{ runner.os }}-${{ hashFiles('**/*.gradle.kts') }}
-          restore-keys: android-cache-${{ runner.os }}-
+          cache-read-only: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop' }}
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
@@ -119,46 +76,10 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: temurin
 
-      - name: Cache Gradle distribution
-        uses: actions/cache@v4
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v3
         with:
-          path: ~/.gradle/wrapper/dists
-          key: gradle-dist-${{ env.GRADLE_VERSION }}
-
-      - name: Generate Gradle wrapper
-        run: |
-          if [ ! -f "gradlew" ] || [ ! -f "gradle/wrapper/gradle-wrapper.jar" ]; then
-            wget -q "https://services.gradle.org/distributions/gradle-${{ env.GRADLE_VERSION }}-bin.zip" -O /tmp/gradle.zip
-            unzip -qo /tmp/gradle.zip -d /tmp
-            /tmp/gradle-${{ env.GRADLE_VERSION }}/bin/gradle wrapper --gradle-version ${{ env.GRADLE_VERSION }}
-          fi
-          chmod +x gradlew
-
-      - name: Cache Gradle wrapper
-        uses: actions/cache@v4
-        with:
-          path: |
-            gradle/wrapper/gradle-wrapper.jar
-            gradle/wrapper/gradle-wrapper.properties
-          key: wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
-
-      - name: Cache Gradle dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/notifications
-          key: gradle-deps-${{ runner.os }}-${{ hashFiles('**/*.gradle.kts') }}
-          restore-keys: gradle-deps-${{ runner.os }}-
-
-      - name: Cache Android build
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.android/build-cache
-            .gradle/build-cache
-          key: android-cache-${{ runner.os }}-${{ hashFiles('**/*.gradle.kts') }}
-          restore-keys: android-cache-${{ runner.os }}-
+          cache-read-only: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop' }}
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
